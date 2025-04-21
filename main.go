@@ -7,17 +7,41 @@ import (
 	"strings"
 )
 
-func cleanInput(text string) []string {
-	return strings.Fields(text)
-}
-
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+	commands := getCommands()
 	for true {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		text := scanner.Text()
-		parts := strings.Fields(strings.ToLower(text))
-		fmt.Printf("Your command was: %s\n", parts[0])
+		parts := cleanInput(text)
+
+		opt, exists := commands[parts[0]]
+		if !exists {
+			fmt.Println("Unknown command")
+		} else {
+			opt.callback()
+		}
+	}
+}
+
+func cleanInput(text string) []string {
+	lowered := strings.ToLower(text)
+	split := strings.Fields(lowered)
+	return split
+}
+
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
 	}
 }
