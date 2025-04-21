@@ -17,7 +17,7 @@ func main() {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		text := scanner.Text()
-		parts := strings.Fields(text)
+		parts := strings.Fields(strings.ToLower(text))
 		fmt.Printf("Your command was: %s\n", parts[0])
 	}
 }
