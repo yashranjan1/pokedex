@@ -5,11 +5,20 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/yashranjan1/pokedex/internal/pokecache"
 )
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	commands := getCommands()
+	config := &config{
+		next: "",
+		prev: "",
+	}
+	cache := pokecache.NewCache(5 * time.Second)
+	c := newCLI(config, cache)
+	commands := c.getCommands()
 	for true {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
@@ -29,19 +38,4 @@ func cleanInput(text string) []string {
 	lowered := strings.ToLower(text)
 	split := strings.Fields(lowered)
 	return split
-}
-
-func getCommands() map[string]cliCommand {
-	return map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback:    commandExit,
-		},
-		"help": {
-			name:        "help",
-			description: "Displays a help message",
-			callback:    commandHelp,
-		},
-	}
 }
