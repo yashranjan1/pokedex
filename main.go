@@ -23,13 +23,21 @@ func main() {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		text := scanner.Text()
+		if len(text) == 0 {
+			continue
+		}
 		parts := cleanInput(text)
 
 		opt, exists := commands[parts[0]]
+
 		if !exists {
 			fmt.Println("Unknown command")
 		} else {
-			opt.callback()
+			var inputs []string
+			if len(parts) > 1 {
+				inputs = append(inputs, parts[1:]...)
+			}
+			opt.callback(inputs)
 		}
 	}
 }
