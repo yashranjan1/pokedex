@@ -199,6 +199,7 @@ func (c cli) commandCatch(inputs []string) error {
 	if randomNumber <= chance {
 		fmt.Printf("%s was caught! \n", pokemon)
 		c.pokedex.Add(pokemon, result)
+		fmt.Println("You may now inspect it with the inspect command.")
 	} else {
 		fmt.Printf("%s escaped! \n", pokemon)
 	}
@@ -233,6 +234,22 @@ func (c cli) commandInspect(inputs []string) error {
 		fmt.Printf(" - %s\n", t.Type.Name)
 	}
 
+	return nil
+}
+
+func (c cli) commandPokedex(inputs []string) error {
+	if len(inputs) != 0 {
+		fmt.Println("Error: Incorrect usage of pokedex")
+		fmt.Println("Usage:")
+		fmt.Println()
+		fmt.Println("pokedex <name-of-pokemon>")
+		return nil
+	}
+
+	fmt.Println("Your Pokedex:")
+	for pokemon, _ := range c.pokedex.pokemon {
+		fmt.Printf(" - %s\n", pokemon)
+	}
 	return nil
 }
 
@@ -272,6 +289,11 @@ func (c cli) getCommands() map[string]cliCommand {
 			name:        "inspect",
 			description: "Inspects a pokemon",
 			callback:    c.commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Displays all the pokemon you have caught",
+			callback:    c.commandPokedex,
 		},
 	}
 }
