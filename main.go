@@ -17,7 +17,8 @@ func main() {
 		prev: "",
 	}
 	cache := pokecache.NewCache(5 * time.Second)
-	c := newCLI(config, cache)
+	pokedex := NewPokedex()
+	c := newCLI(config, cache, pokedex)
 	commands := c.getCommands()
 	for true {
 		fmt.Print("Pokedex > ")

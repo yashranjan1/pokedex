@@ -13,12 +13,13 @@ import (
 )
 
 type cli struct {
-	config *config
-	cache  *pokecache.Cache
+	config  *config
+	cache   *pokecache.Cache
+	pokedex *Pokedex
 }
 
-func newCLI(conf *config, cache *pokecache.Cache) cli {
-	return cli{config: conf, cache: cache}
+func newCLI(conf *config, cache *pokecache.Cache, pokedex *Pokedex) cli {
+	return cli{config: conf, cache: cache, pokedex: pokedex}
 }
 
 const baseUrl string = "https://pokeapi.co/api/v2"
@@ -189,14 +190,49 @@ func (c cli) commandCatch(inputs []string) error {
 
 	baseXP := float64(result.BaseExperience)
 	chance := .75 * (1 - (.9 * (baseXP / 600)))
+	if chance < .05 {
+		chance = .05
+	}
 
 	randomNumber := rand.Float64()
-
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon)
 	if randomNumber <= chance {
 		fmt.Printf("%s was caught! \n", pokemon)
+		c.pokedex.Add(pokemon, result)
 	} else {
 		fmt.Printf("%s escaped! \n", pokemon)
 	}
+	return nil
+}
+
+func (c cli) commandInspect(inputs []string) error {
+	if len(inputs) != 1 {
+		fmt.Println("Error: Incorrect usage of inspect")
+		fmt.Println("Usage:")
+		fmt.Println()
+		fmt.Println("inspect <name-of-pokemon>")
+	}
+	pokemon := inputs[0]
+
+	pokedata, ok := c.pokedex.pokemon[pokemon]
+
+	if !ok {
+		fmt.Println("you have not caught that pokemon")
+		return nil
+	}
+
+	fmt.Printf("Name: %s\n", pokedata.Name)
+	fmt.Printf("Height: %d\n", pokedata.Height)
+	fmt.Printf("Weight: %d\n", pokedata.Weight)
+	fmt.Println("Stats: ")
+	for _, stat := range pokedata.Stats {
+		fmt.Printf("  -%s: %d\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, t := range pokedata.Types {
+		fmt.Printf(" - %s\n", t.Type.Name)
+	}
+
 	return nil
 }
 
@@ -231,6 +267,11 @@ func (c cli) getCommands() map[string]cliCommand {
 			name:        "catch",
 			description: "Attempts to catch a pokemon",
 			callback:    c.commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspects a pokemon",
+			callback:    c.commandInspect,
 		},
 	}
 }
